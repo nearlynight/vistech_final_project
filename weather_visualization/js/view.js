@@ -6,12 +6,27 @@ var STARTANGLE = 45;
 var ENDANGLE = 180;
 var AMOUNTBARS = 5;
 var ANGLEBETWEENBARS = 5;
+var BARWIDTH = 600;
 
+function initControls() {
+	BARWIDTH = CANVAS.width;
+	$("#rangeInput").css({
+		"width" : BARWIDTH + "px"
+	});
+	$('.bar').on('input', function () {
+		var value = parseInt($("#rangeInput").val(), 10);
+		var day = averagevalues[value].datetime;
+		$("#dateview").html(day.toDayMonth());
+		var dateLeftPosition = (BARWIDTH / (averagevalues.length-1)) * value;
+		var top = document.getElementById("rangeInput").offsetTop + document.getElementById("rangeInput").offsetHeight*2;
+		$("#dateview").css({
+			"left" : dateLeftPosition + "px",
+			"top" : top + "px",
+			"display" : "block"
+		});
 
-function start() {
-
-	drawBars();
-
+		//var val1 = parseInt($("#rangeInput").val(), 10);
+	});
 }
 
 function toRadians(angle) {
@@ -61,9 +76,9 @@ function drawBars(subset) {
 	CANVAS = document.getElementById("myCanvas");
 	CONTEXT = CANVAS.getContext("2d");
 	CONTEXT.fillStyle = "#00AAAA";
-	var v = [.6, .4, .8, .5, .7];
+	var v = [.5, .4, .8, .5, .7];
 	var barwidth = (ENDANGLE - (2 * STARTANGLE) - ((AMOUNTBARS -1) * ANGLEBETWEENBARS)) / AMOUNTBARS;
-	console.log(barwidth);
+	//console.log(barwidth);
 
 	for (var i = 0; i < v.length; ++i) {
 		var poly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * i + barwidth * i, 

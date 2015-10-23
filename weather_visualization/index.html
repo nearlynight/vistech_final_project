@@ -1,16 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<link rel="stylesheet" href="style.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script type="text/javascript" src="js/view.js"></script>
 	<script type="text/javascript" src="js/model.js"></script>	
 	<script type="text/javascript" src="js/controller.js"></script>
-	<script type="text/javascript" src="js/moment.js"></script>	
 </head>
 <body onload="start()">
 	<canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
-
 	</canvas> 
+	<div id="slider">
+	    <form oninput="amount.value=rangeInput.value;">
+	        <input name="one" class="bar" type="range" id="rangeInput" value="0"  min="0" max="100" />
+			<span class="highlight"> 
+	        </span>
+	        <output name="amount" for="rangeInput">0</output>
+	        <div id="dateview">
+
+	        </div>
+	    </form>
+	</div>
 </body>
 </html>
 
