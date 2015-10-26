@@ -13,11 +13,6 @@ input[type=range]::-webkit-slider-thumb {
 	height: 0px;
     width: 0px;
     -webkit-appearance: none;
-    /*border: none;
-    height: 16px;
-    width: 16px;
-    border-radius: 50%;
-    background: #33CCCC;*/
     margin-top: -4px;
     border-top: solid 20px #33CCCC;
     border-left: solid 10px rgba(0,0,0,0);
@@ -47,9 +42,19 @@ input[type=range]:focus::-webkit-slider-runnable-track {
 	top: 0px;
 	display: none;
 	padding: 5px;
-    font-family: arial;
+    font-family: "Roboto" ;
     border: 1px solid rgb(192, 192, 192);
     border-radius: 5px;
     background-color: white;
 }
 
+#tooltip {
+    display: none;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    font-family: "Roboto";
+    border: 1px solid rgb(192, 192, 192);
+    border-radius: 5px;
+    background-color: white;
+}

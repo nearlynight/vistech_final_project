@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="style.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script type="text/javascript" src="js/view.js"></script>
@@ -8,19 +11,23 @@
 	<script type="text/javascript" src="js/controller.js"></script>
 </head>
 <body onload="start()">
-	<canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
+	<canvas id="myCanvas" width="800" height="400" style="border:1px solid #000000;">
 	</canvas> 
 	<div id="slider">
-	    <form oninput="amount.value=rangeInput.value;">
+	    <form oninput="rangeInput.value;">
 	        <input name="one" class="bar" type="range" id="rangeInput" value="0"  min="0" max="100" />
 			<span class="highlight"> 
 	        </span>
-	        <output name="amount" for="rangeInput">0</output>
+	        
 	        <div id="dateview">
-
 	        </div>
 	    </form>
 	</div>
+	<div id="tooltip">
+	</div>
+	<canvas id="graphCanvas" width="800" height="400" style="border:1px solid #000000;">
+	</canvas> 
+
 </body>
 </html>
 

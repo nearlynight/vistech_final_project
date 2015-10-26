@@ -11,6 +11,7 @@ function start() {
 	});
 	drawBars();
 	initControls();
+
 }
 
 function calculateAverage(data) {
@@ -40,7 +41,7 @@ function calculateAverage(data) {
 			averP = averPSum / j;
 			averRh = averRhSum / j;
 			averWv = averWvSum / j;
-			averRain = averRainSum / j;
+			averRain = averRainSum;
 
 			var averObj = {
 				datetime: data[i].datetime,
@@ -67,9 +68,52 @@ function calculateAverage(data) {
 			console.log(i + " rain: " + averRain);*/
 		}		
 	}
-	console.log(averagevalues.length);
+	//console.log(averagevalues.length);
 	saveMinMax();
 	createYearBar();
+}
+
+function getValueFromIndex(averObj, i) {
+	if(i == 0) {
+		return {
+			unit: unescape("%B0") + "C",
+			value: averObj.temp
+		};
+	} else if (i == 1) {
+		return {
+			unit: "mm",
+			value: averObj.rain
+		};
+	} else if (i == 2) {
+		return {
+			unit: "m/s",
+			value: averObj.wv
+		};
+	} else if (i == 3) {
+		return {
+			unit: "mbar",
+			value: averObj.p
+		};
+	} else if (i == 4) {
+		return {
+			unit: "%",
+			value: averObj.rh
+		};
+	}
+}
+
+function getKeyFromIndex(averObj, i) {
+	if(i == 0) {
+		return "temp";
+	} else if (i == 1) {
+		return "rain";
+	} else if (i == 2) {
+		return "wv";
+	} else if (i == 3) {
+		return "p";
+	} else if (i == 4) {
+		return "rh";
+	}
 }
 
 function saveMinMax() {
@@ -81,7 +125,7 @@ function saveMinMax() {
 		wv: getMinMax("wv"),
 		rain: getMinMax("rain")
 	};
-	//console.log(EXTREMA);
+	console.log(EXTREMA);
 }
 
 function createYearBar() {

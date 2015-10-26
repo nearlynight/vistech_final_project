@@ -1,6 +1,6 @@
 <?php
 	$text = array();
-	$file = fopen("../data/test.csv","r");
+	$file = fopen("../data/full_years/mpi_roof_2006.csv","r");
 	while(! feof($file))
 	  {
 	  	$temp = fgetcsv($file);
