@@ -9,8 +9,9 @@ var ENDANGLE = 180;
 var AMOUNTBARS = 5;
 var ANGLEBETWEENBARS = 5;
 var DAYBARWIDTH = 600;
-var ACTIVEDAY = 1;
+//var ACTIVEDAY = 1;
 var POLYGONS = [];
+var SLIDERS = [];
 var RANGE = {
 	temp: {
 		min: -7,
@@ -34,45 +35,64 @@ var RANGE = {
 	}
 };
 
-function initControls() {
-	DAYBARWIDTH = CANVAS.width;
+function initControls(callBack) {
+/*	DAYBARWIDTH = CANVAS.width;
 	$("#rangeInput").css({
 		"width" : DAYBARWIDTH + "px"
-	});
-	$('.bar').on('input', function () {
+	});*/
+	/*$('.bar').on('input', function () {
 		var value = parseInt($("#rangeInput").val(), 10);
-		ACTIVEDAY = averagevalues[value];
-		var day = averagevalues[value].datetime;
+		console.log("VALUE: " + value);
+		console.log("DATE: " + ACTIVEDAY);
+		ACTIVEDAY = AVERAGEVALUES[value];
+		console.log("HERE: " + AVERAGEVALUES[value]);
+		var day = AVERAGEVALUES[value].datetime;
 		$("#dateview").html(day.toDayMonth());
-		var dateLeftPosition = (DAYBARWIDTH / (averagevalues.length-1)) * value;
+		var dateLeftPosition = (DAYBARWIDTH / (AVERAGEVALUES.length-1)) * value;
 		var top = document.getElementById("rangeInput").offsetTop + document.getElementById("rangeInput").offsetHeight*2;
+		var canvas = document.getElementById("myCanvas");
 		$("#dateview").css({
-			"left" : dateLeftPosition + "px",
+			"left" : (canvas.offsetLeft + dateLeftPosition) + "px",
 			"top" : top + "px",
 			"display" : "block"
 		});
 		updateBars();
-	});
+	});*/
+
+	CANVAS = document.getElementById("myCanvas");
+	CONTEXT = CANVAS.getContext("2d");
 
 	CANVAS.onmousemove = function(e) {
 		var pt = {
 			x: e.clientX,
 			y: e.clientY
 		};
+		pt.x -= CANVAS.offsetLeft;
+		pt.y -= CANVAS.offsetTop;
+
 		var show = false;
 		var activeBar = null;
+		var activeSlider = null;
 		for(var i = 0; i < POLYGONS.length; i++) {
 			if (POLYGONS[i].isPointInside(pt)) {
 				show = true;
-				activeBar = i;
+				activeSlider = POLYGONS[i].slider;
+				activeBar = i % AMOUNTBARS;
 			}
 		}
 		if (show == true) {
 			//console.log("POINT INSIDE: " + i);
-			var foo = getValueFromIndex(ACTIVEDAY, activeBar).value * 10;
+			console.log(activeBar);
+			var foo = getValueFromIndex(activeSlider.activeday, activeBar).value * 10;
 			b = Math.round(foo)
 			bar = b / 10
-			$("#tooltip").html(bar + " " + getValueFromIndex(ACTIVEDAY, activeBar).unit);
+			$("#tooltip").html(bar + " " + getValueFromIndex(activeSlider.activeday, activeBar).unit);
+
+			//var canvas = document.getElementById("myCanvas");
+			pt.x += CANVAS.offsetLeft;
+			pt.y += CANVAS.offsetTop;
+
+			//console.log("POINT: " + pt.x + " " + pt.y + " ACTIVE BAR: " + activeBar);
 			$("#tooltip").css({
 				"left" : (pt.x+10) + "px",
 				"top" : (pt.y+10) + "px",
@@ -80,7 +100,7 @@ function initControls() {
 			});
 		} else {
 			$("#tooltip").css({
-				"left" : pt.x + "px",
+				"left" : (pt.x) + "px",
 				"top" : pt.y + "px",
 				"display" : "none"
 			});
@@ -92,6 +112,8 @@ function initControls() {
 			x: e.clientX,
 			y: e.clientY
 		};
+		pt.x -= CANVAS.offsetLeft;
+		pt.y -= CANVAS.offsetTop;
 		var activeBar = null;
 		for(var i = 0; i < POLYGONS.length; i++) {
 			if (POLYGONS[i].isPointInside(pt)) {
@@ -104,19 +126,102 @@ function initControls() {
 			drawGraphs(key);
 		} 
 	};
+
+	var plus_button = document.getElementById("add_year");
+	plus_button.onclick = function(e) {
+		var pt = {
+			x: e.clientX,
+			y: e.clientY
+		};
+		console.log("TEST+");
+		var year = document.getElementById("year_input_1").value;
+		console.log("YEAR: " + year);
+		var popupPosition = window.innerWidth/2 - 100;
+		$("#popup").css({
+				"left" : (window.innerWidth/2 - 100) + "px",
+				"top" : (window.innerHeight/2 -100) + "px"
+			});
+		$("popup").html("");
+		$("#popup").fadeIn();
+	}
+	if(typeof callBack != "undefined") {
+		callBack();
+	}
+}
+
+function CountElementsOfYear(year) {
+	var count = 0;
+	for (var i = 0; i < AVERAGEVALUES.length; i++) {
+		if(AVERAGEVALUES[i].datetime.getFullYear() == year) {
+			count++;
+		}
+	}
+	return count;
+}
+
+function Slider(year){
+	this.year = year;
+	this.position = 0;
+	this.min = 0;
+	this.max = CountElementsOfYear(this.year);
+	this.averagevalues = [];
+	this.color = "rgba(250,0,0,0.5)";
+	if (this.year == 2004) {
+		this.color = "rgba(0,255,0,0.5)";
+	} else if (this.year == 2005) {
+		this.color = "rgba(0,0,255,0.5)";
+	} else if (this.year == 2006) {
+		this.color = "rgba(250,0,0,0.5)";
+	}
+	
+	for (var i = 0; i < AVERAGEVALUES.length; i++) {
+		if (this.year == AVERAGEVALUES[i].datetime.getFullYear()) {
+			this.averagevalues.push(AVERAGEVALUES[i]);
+		}
+	}
+	this.activeday = this.averagevalues[0];
+	this.show = function (){
+		this.div = document.createElement("div");
+		this.div.innerHTML = '<form oninput="rangeInput' + this.year + '.value;"><input name="' + this.year + '" class="bar rangeInput" type="range" id="rangeInput' + this.year + '" value="0"  min="0" max="' + this.max + '" /><span class="highlight"> </span><div id="dateview' + this.year + '" class="dateview"></div></form>';
+		$("#sliders").append(this.div);
+		$('#rangeInput' + this.year).on('input', {obj:this}, function (event) {
+			var that = event.data.obj;
+			var rangeEl = document.getElementById("rangeInput" + that.year);
+			var dateviewEl = document.getElementById("dateview" + that.year);
+
+			// get active day
+			var value = parseInt($(rangeEl).val(), 10);
+			that.activeday = that.averagevalues[value];
+			
+			// dateview position calculation
+			$(dateviewEl).html(that.averagevalues[value].datetime.toDayMonth());
+			var dateLeftPosition = (DAYBARWIDTH / (that.averagevalues.length-1)) * value;
+			$(dateviewEl).css({
+				"left" : (CANVAS.offsetLeft + dateLeftPosition) + "px",
+				"top" : (rangeEl.offsetTop + rangeEl.offsetHeight*2) + "px",
+				"display" : "block"
+			});
+			updateBars();
+		});
+	};
 }
 
 function toRadians(angle) {
 	return angle * (Math.PI / 180);
 }
 
-function Polygon(p1, p2, p3, p4) {
+function Polygon(p1, p2, p3, p4, slider) {
 	this.p1 = p1;
 	this.p2 = p2;
 	this.p3 = p3;
 	this.p4 = p4;
-	this.draw = function(color) {
-		CONTEXT.fillStyle = color;
+	this.slider = slider;
+	this.draw = function() {
+		if(this.slider != null){
+			CONTEXT.fillStyle = this.slider.color;
+		} else {
+			CONTEXT.fillStyle = "#E0E0E0";
+		}
 		CONTEXT.beginPath();
 		CONTEXT.moveTo(this.p1.x, this.p1.y);
 		CONTEXT.lineTo(this.p2.x, this.p2.y);
@@ -134,9 +239,10 @@ function Polygon(p1, p2, p3, p4) {
 	        && (c = !c);
 	    return c;
 	}
+
 }
 
-function createPolygon(angle1, angle2, value) {
+function createPolygon(angle1, angle2, value, slider) {
 	var p1 = {};
 	var p2 = {};
 	var p3 = {};
@@ -154,49 +260,49 @@ function createPolygon(angle1, angle2, value) {
 	p4.x = CANVAS.width/2 - Math.sin(toRadians(90) - angle1) * R1;
 	p4.y = CANVAS.height - Math.sin(angle1) * R1;
 
-	var poly = new Polygon(p1, p2, p3, p4);
+	var poly = new Polygon(p1, p2, p3, p4, slider);
 	return poly;
 }
 
-function drawBars(subset) {
+/*function drawBars(subset) {
 	CANVAS = document.getElementById("myCanvas");
 	CONTEXT = CANVAS.getContext("2d");
 	updateBars();
+}*/
+
+function drawCircle(x, y, radius, color, context) {
+	var centerX = x;
+	var centerY = y;
+	context.beginPath();
+	context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+	context.fillStyle = color;
+	context.fill();
 }
 
 function drawGraphs(key) {
+	var graph_width = 380;
+	var graph_height = 750;
 	GRAPH_CANVAS = document.getElementById("graphCanvas");
 	GRAPH_CONTEXT = GRAPH_CANVAS.getContext("2d");
 	GRAPH_CONTEXT.clearRect(0, 0, GRAPH_CANVAS.width, GRAPH_CANVAS.height);
 	GRAPH_CONTEXT.beginPath();
 	GRAPH_CONTEXT.moveTo(20,20);
-	GRAPH_CONTEXT.lineTo(20,380);
-	GRAPH_CONTEXT.lineTo(750,380);
+	GRAPH_CONTEXT.lineTo(20,graph_width);
+	GRAPH_CONTEXT.lineTo(graph_height,graph_width);
 	GRAPH_CONTEXT.stroke();
-	//console.log("GRAPH: " + averagevalues.length);
-	for(var i=0; i <= 365; i++) {
+	//console.log("GRAPH: " + AVERAGEVALUES.length);
+	for(var i=1; i <= AVERAGEVALUES.length; i++) {
 		var pointX = 20 + i*2;
-		var bar = null;
-		if (key == "temp") {
-			bar = averagevalues[i].temp;
-		} else if (key == "rain") {
-			bar  = averagevalues[i].rain;
-		} else if (key == "wv") {
-			bar  = averagevalues[i].wv;
-		} else if (key == "p") {
-			bar  = averagevalues[i].p;
-		} else if (key == "rh") {
-			bar  = averagevalues[i].rh;
+		if (typeof AVERAGEVALUES[i] != "undefined") {
+			var valueinpercent = (AVERAGEVALUES[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
+			var pointY = valueinpercent * 300;
+			GRAPH_CONTEXT.fillStyle = "#31CDD5";
+			drawCircle(pointX, 360-pointY, 1, "#000099", GRAPH_CONTEXT);
+			//GRAPH_CONTEXT.fillRect(pointX, 360 - pointY, 2, 2); // fill in the pixel at (10,10)
 		}
-		var foo = (bar - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
-		var pointY = foo * 300;
-		GRAPH_CONTEXT.fillStyle = "#31CDD5";
-		GRAPH_CONTEXT.fillRect(pointX, 360 - pointY, 2, 2); // fill in the pixel at (10,10)
 		//console.log("HERE: " + key);
 	}
 }
-
-
 
 function drawLabel(trans, rota, text, color) {
 	CONTEXT.translate(trans.x,trans.y);
@@ -211,9 +317,16 @@ function drawLabel(trans, rota, text, color) {
 function updateBars() {
 	CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
 
-	//1 Text, 2 Rotate, 3 Translate
-	//CONTEXT.rotate(45);
-	//CONTEXT.font = "30px Comic Sans MS";
+	
+	var DAYbarwidth = (ENDANGLE - (2 * STARTANGLE) - ((AMOUNTBARS -1) * ANGLEBETWEENBARS)) / AMOUNTBARS;
+
+	// draw background of bars
+	for (var i = 0; i < AMOUNTBARS; ++i) {
+		var initPoly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * i, 
+									STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * (i+1), 
+									1.0, null);
+		initPoly.draw("#E0E0E0");
+	}
 
 	//CONTEXT.rotate(45);
 	drawLabel({x:190, y:180}, 40, "Temperatur "+ unescape("%B0") + "C", "#3B3B3B");
@@ -221,54 +334,55 @@ function updateBars() {
 	drawLabel({x:360, y:95}, 0, "Windgeschw. m/s", "#3B3B3B");
 	drawLabel({x:470, y:100}, -20, "Luftdruck mbar", "#3B3B3B");
 	drawLabel({x:565, y:140}, -40, "Luftfeuchte %", "#3B3B3B");
-
+	
+	// empty polygon array
 	POLYGONS = [];
 
 	//CONTEXT.fillStyle = "#00AAAA";
-	if(typeof RANGE.temp == "undefined")
-		var temp = (ACTIVEDAY.temp - RANGE.temp.min) / (RANGE.temp.max - RANGE.temp.min); 
-	else
-		var temp = (ACTIVEDAY.temp - getMinMax("temp").min) / (getMinMax("temp").max - getMinMax("temp").min); 	
-	if(typeof RANGE.rain == "undefined")
-		var rain = (ACTIVEDAY.rain - RANGE.rain.min) / (RANGE.rain.max - RANGE.rain.min); 
-	else
-		var rain = (ACTIVEDAY.rain - getMinMax("rain").min) / (getMinMax("rain").max - getMinMax("rain").min); 
-	if(typeof RANGE.wv == "undefined")
-		var wv = (ACTIVEDAY.wv - RANGE.wv.min) / (RANGE.wv.max - RANGE.wv.min); 
-	else
-		var wv = (ACTIVEDAY.wv - getMinMax("wv").min) / (getMinMax("wv").max - getMinMax("wv").min); 
-	if(typeof RANGE.p == "undefined")
-		var p = (ACTIVEDAY.p - RANGE.p.min) / (RANGE.p.max - RANGE.p.min); 
-	else
-		var p = (ACTIVEDAY.p - getMinMax("p").min) / (getMinMax("p").max - getMinMax("p").min);
-	if(typeof RANGE.rh == "undefined")
-		var rh = (ACTIVEDAY.rh - RANGE.rh.min) / (RANGE.rh.max - RANGE.rh.min); 
-	else
-		var rh = (ACTIVEDAY.rh - getMinMax("rh").min) / (getMinMax("rh").max - getMinMax("rh").min); 
 
-	//console.log("ACTIVE DAY WV: " + ACTIVEDAY.wv);
+	//console.log(SLIDERS);
 
-	//var temp = valueAsPercent(ACTIVEDAY.temp, "temp") / 100;
-	//var rain = valueAsPercent(ACTIVEDAY.rain, "rain") / 100;
-	//var wv = valueAsPercent(ACTIVEDAY.wv, "wv") / 100;
-	//var p = valueAsPercent(ACTIVEDAY.p, "p") / 100;
-	//var rh = valueAsPercent(ACTIVEDAY.rh, "rh") / 100;
-	var v = [temp, rain, wv, p, rh];
-	var DAYbarwidth = (ENDANGLE - (2 * STARTANGLE) - ((AMOUNTBARS -1) * ANGLEBETWEENBARS)) / AMOUNTBARS;
-	console.log(ACTIVEDAY);
-	console.log(getMinMax("temp"));
-	console.log(temp);
+	for (var i = 0; i < SLIDERS.length; i++){
+		// adapt values to percentage
+		if(typeof RANGE.temp == "undefined")
+			var temp = (SLIDERS[i].activeday.temp - RANGE.temp.min) / (RANGE.temp.max - RANGE.temp.min); 
+		else
+			var temp = (SLIDERS[i].activeday.temp - getMinMax("temp").min) / (getMinMax("temp").max - getMinMax("temp").min); 	
+		if(typeof RANGE.rain == "undefined")
+			var rain = (SLIDERS[i].activeday.rain - RANGE.rain.min) / (RANGE.rain.max - RANGE.rain.min); 
+		else
+			var rain = (SLIDERS[i].activeday.rain - getMinMax("rain").min) / (getMinMax("rain").max - getMinMax("rain").min); 
+		if(typeof RANGE.wv == "undefined")
+			var wv = (SLIDERS[i].activeday.wv - RANGE.wv.min) / (RANGE.wv.max - RANGE.wv.min); 
+		else
+			var wv = (SLIDERS[i].activeday.wv - getMinMax("wv").min) / (getMinMax("wv").max - getMinMax("wv").min); 
+		if(typeof RANGE.p == "undefined")
+			var p = (SLIDERS[i].activeday.p - RANGE.p.min) / (RANGE.p.max - RANGE.p.min); 
+		else
+			var p = (SLIDERS[i].activeday.p - getMinMax("p").min) / (getMinMax("p").max - getMinMax("p").min);
+		if(typeof RANGE.rh == "undefined")
+			var rh = (SLIDERS[i].activeday.rh - RANGE.rh.min) / (RANGE.rh.max - RANGE.rh.min); 
+		else
+			var rh = (SLIDERS[i].activeday.rh - getMinMax("rh").min) / (getMinMax("rh").max - getMinMax("rh").min); 
 
-	for (var i = 0; i < v.length; ++i) {
-		var initPoly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * i, 
-									STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * (i+1), 
-									1.0);
-		initPoly.draw("#E0E0E0");
-		var poly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * i, 
-									STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * (i+1), 
-									v[i]);
-		poly.draw("#31CDD5");
-		POLYGONS.push(poly);
+		//console.log("ACTIVE DAY WV: " + ACTIVEDAY.wv);
+
+		//console.log(ACTIVEDAY);
+		//console.log(getMinMax("temp"));
+		//console.log(temp);
+
+		var v = [temp, rain, wv, p, rh];
+
+		for (var j = 0; j < v.length; ++j) {
+			//console.log("DUDE!");
+			var poly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * j + DAYbarwidth * j, 
+										STARTANGLE + ANGLEBETWEENBARS * j + DAYbarwidth * (j+1), 
+										v[j], SLIDERS[i]);
+			//console.log(poly);
+			poly.draw();
+			POLYGONS.push(poly);
+		}
+
 	}
 }
 

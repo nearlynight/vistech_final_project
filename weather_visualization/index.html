@@ -11,23 +11,22 @@
 	<script type="text/javascript" src="js/controller.js"></script>
 </head>
 <body onload="start()">
+<div id="container">
 	<canvas id="myCanvas" width="800" height="400" style="border:1px solid #000000;">
 	</canvas> 
-	<div id="slider">
-	    <form oninput="rangeInput.value;">
-	        <input name="one" class="bar" type="range" id="rangeInput" value="0"  min="0" max="100" />
-			<span class="highlight"> 
-	        </span>
-	        
-	        <div id="dateview">
-	        </div>
-	    </form>
+	<div id="sliders">
 	</div>
+	<div id="add_year">
+		+
+	</div>
+	<div id="popup">
+	</div>
+	<input type="number" id="year_input_1"> 
 	<div id="tooltip">
 	</div>
 	<canvas id="graphCanvas" width="800" height="400" style="border:1px solid #000000;">
 	</canvas> 
-
+</div>
 </body>
 </html>
 

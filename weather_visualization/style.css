@@ -28,15 +28,33 @@ input[type=range]:focus::-webkit-slider-runnable-track {
     background: #ccc;
 }
 
-#slider {
+body {
+    font-size: 10px;
+}
+
+#container {
+    width: 800px;
+    margin: 0px auto;
+}
+
+#slider, #slider_2, #slider_3 {
 	height: 50px;
 }
 
-#rangeInput {
+#slider_2 {
+    display: none;
+}
+
+#slider_3 {
+    display: none;
+}
+
+
+.rangeInput {
 	width: 800px;
 }
 
-#dateview {
+.dateview {
 	position: absolute;
 	left: 0px;
 	top: 0px;
@@ -57,4 +75,33 @@ input[type=range]:focus::-webkit-slider-runnable-track {
     border: 1px solid rgb(192, 192, 192);
     border-radius: 5px;
     background-color: white;
+}
+
+#add_year {
+    width: 30px;
+    height: 30px;
+    line-height: 32px;
+    margin: 0px auto;
+    margin-bottom: 20px;
+    padding: 4px 5px 5px 4px;
+    font-family: "Roboto";
+    font-size: 400%;
+    font-weight: bold;
+    color: rgb(97, 97, 97);
+    text-align: center;
+    border: 3px solid rgb(192, 192, 192);
+    border-radius: 50%;
+    background-color: white;
+}
+
+#year_input_1 {
+
+}
+
+#popup {
+    display: none;
+    background-color: red;
+    position: fixed;
+    width: 100px;
+    height: 100px;
 }

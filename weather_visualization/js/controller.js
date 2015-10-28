@@ -1,26 +1,88 @@
 //console.log("test");
 
 var set = [];
-var averagevalues = [];
+var AVERAGEVALUES = [];
 var EXTREMA = null;
+var YEARS = [];
+
 
 function start() {
-	loadData(function(result){
-		prepareData(result);
-		calculateAverage(result);
-	});
-	drawBars();
-	initControls();
+	for(var i = 2004; i <= 2006; i++) {
+		YEARS.push({
+			year: i,
+			active: false,
+			loaded: false
+		});
+	}
 
+	YEARS[0].active = true;
+	YEARS[1].active = true;
+	//YEARS[0].loaded = true;
+
+	loadData(function(result){
+		//console.log(result);
+		prepareData(result, function(data){
+			//console.log(data);
+			calculateAverage(data, function(data){
+				initControls(function(){
+					createSliders();
+					updateBars();
+				});
+			});
+		});
+	}, 	YEARS);
+
+	
 }
 
-function calculateAverage(data) {
+function ListEl(year) {
+	this.year = year;
+	this.div = document.createElement("div");
+	//div document.createElement("div")// element zum draufdruecken
+	//$(popup).append(div);
+	$("#popup").append(this.div);
+	// event.data.obj
+	div.onclick ... {obj:this}, function(event) {
+		loadData(function(result) {
+			//console.log(result);
+			prepareData(result, function(data){
+				//console.log(data);
+				calculateAverage(data, function(data){
+					createSliders();
+					updateBars();
+				});
+			});
+		},[event.data.obj.year]);
+}
+
+
+	
+function existSlider(year){
+	for (var i = 0; i < SLIDERS.length; i++) {
+		if(SLIDERS[i].year == year){
+			return true;
+		}
+	}
+}
+
+function createSliders() {
+	for(var j = 0; j < YEARS.length; j++) {
+		if (YEARS[j].active && !existSlider(YEARS[j].year)){
+			var newSlider = new Slider(YEARS[j].year);
+			newSlider.show();
+			SLIDERS.push(newSlider);			
+		}
+	}
+}
+
+function calculateAverage(data, callBack) {
 	var averTempSum = 0;
 	var averPSum = 0;
 	var averRhSum = 0;
 	var averWvSum = 0;
 	var averRainSum = 0;
 	var j = 0;
+	//console.log(data);
 	for (var i = 1; i < data.length; i++) {
 		averTempSum = averTempSum + data[i].temp;
 		averPSum = averPSum + data[i].p;
@@ -52,7 +114,7 @@ function calculateAverage(data) {
 				rain: averRain
 			}
 
-			averagevalues.push(averObj);
+			AVERAGEVALUES.push(averObj);
 
 			j = 0;
 			averTempSum = 0;
@@ -68,9 +130,10 @@ function calculateAverage(data) {
 			console.log(i + " rain: " + averRain);*/
 		}		
 	}
-	//console.log(averagevalues.length);
+	//console.log(AVERAGEVALUES.length);
 	saveMinMax();
-	createYearBar();
+	//createYearBar();
+	callBack();
 }
 
 function getValueFromIndex(averObj, i) {
@@ -128,20 +191,20 @@ function saveMinMax() {
 	console.log(EXTREMA);
 }
 
-function createYearBar() {
+/*function createYearBar() {
 	document.getElementById("rangeInput").min = 0;
-	document.getElementById("rangeInput").max = averagevalues.length-1;
-}
+	document.getElementById("rangeInput").max = AVERAGEVALUES.length-1;
+}*/
 
 function getMinMax(key) {
 	var min = null;
 	var max = null;
-	for (var i = 0; i < averagevalues.length; ++i) {
-		if(averagevalues[i][key] < min || min == null) {
-			min = averagevalues[i][key];
+	for (var i = 0; i < AVERAGEVALUES.length; ++i) {
+		if(AVERAGEVALUES[i][key] < min || min == null) {
+			min = AVERAGEVALUES[i][key];
 		}
-		if(averagevalues[i][key] > max || max == null) {
-			max = averagevalues[i][key];
+		if(AVERAGEVALUES[i][key] > max || max == null) {
+			max = AVERAGEVALUES[i][key];
 		}
 	}
 	return {
@@ -154,22 +217,33 @@ function valueAsPercent(value, key) {
 	return ((value - EXTREMA[key].min) * ((EXTREMA[key].max - EXTREMA[key].min) / 100));
 }
 
-function prepareData(data) {
-	for (var i = 0; i < data.length; ++i) {
+function prepareData(data, callBack) {
+	//console.log("TEST");
+	for (var i = 0; i < data.length; i++) {
+		//if(i == 0) console.log("na moin");
+		//console.log(data[i].datetime);
 		data[i].datetime = stringToDate(data[i].datetime);
+		for(var j = 0; j < YEARS.length; j++) {
+			if (data[i].datetime.getFullYear() == YEARS[j].year){
+				YEARS[j].loaded = true;
+			}
+		}
 		data[i].temp = stringToNumber(data[i].temp);
 		data[i].p = stringToNumber(data[i].p);
 		data[i].rh = stringToNumber(data[i].rh);
 		data[i].wv = stringToNumber(data[i].wv);
 		data[i].rain = stringToNumber(data[i].rain);
 	}
+	callBack(data);
 }
 
 function stringToDate(str) {
-	if(str != null) {
+	if(str != null && typeof str == "string") {
 		var t = str.split(/[. :]/);
 		var d = new Date(t[2], t[1]-1, t[0], t[3], t[4], t[5]);
 		return d;
+	} else {
+		return str;
 	}
 }
 
