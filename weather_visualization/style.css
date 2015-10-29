@@ -51,7 +51,7 @@ body {
 
 
 .rangeInput {
-	width: 800px;
+	width: 730px;
     margin-top: 20px;
 }
 
@@ -106,4 +106,16 @@ body {
     position: fixed;
     width: 150px;
     height: 150px;
+}
+
+.yearName {
+    font-size: 150%;
+}
+
+.closeButton {
+    background-color: red;
+}
+
+.yearButton {
+    width: 100%;
 }

@@ -7,7 +7,7 @@ var YEARS = [];
 
 
 function start() {
-	for(var i = 2004; i <= 2008; i++) {
+	for(var i = 2004; i <= 2014; i++) {
 		YEARS.push({
 			year: i,
 			active: false,
@@ -39,6 +39,7 @@ function ListEl(yearObj) {
 	//console.log(yearObj);
 	this.yearObj = yearObj;
 	this.button = document.createElement("button");// element zum draufdruecken
+	this.button.className = "yearButton";
 	this.button.innerHTML = this.yearObj.year;
 	$("#popup").append(this.button);
 	//$('#button' + this.year)
@@ -92,6 +93,21 @@ function getSliderFromYear(year){
 		}
 	}
 }
+
+function getKeyFromIndex(averObj, i) {
+	if(i == 0) {
+		return "temp";
+	} else if (i == 1) {
+		return "rain";
+	} else if (i == 2) {
+		return "wv";
+	} else if (i == 3) {
+		return "p";
+	} else if (i == 4) {
+		return "rh";
+	}
+}
+
 
 function createSliders() {
 	for(var j = 0; j < YEARS.length; j++) {
@@ -198,20 +214,6 @@ function getValueFromIndex(averObj, i) {
 	}
 }
 
-function getKeyFromIndex(averObj, i) {
-	if(i == 0) {
-		return "temp";
-	} else if (i == 1) {
-		return "rain";
-	} else if (i == 2) {
-		return "wv";
-	} else if (i == 3) {
-		return "p";
-	} else if (i == 4) {
-		return "rh";
-	}
-}
-
 function saveMinMax() {
 	EXTREMA = {
 		datetime: getMinMax("datetime"),
@@ -221,7 +223,7 @@ function saveMinMax() {
 		wv: getMinMax("wv"),
 		rain: getMinMax("rain")
 	};
-	console.log(EXTREMA);
+	//console.log(EXTREMA);
 }
 
 /*function createYearBar() {

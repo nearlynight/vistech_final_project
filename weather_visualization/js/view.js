@@ -13,6 +13,8 @@ var DAYBARWIDTH = 600;
 var POLYGONS = [];
 var SLIDERS = [];
 var MOUSEOVERPOLYGONS = [];
+var MOUSECLICKPOLYGONS = [];
+var DRAWGRAPHARRAY = [];
 var RANGE = {
 	temp: {
 		min: -7,
@@ -82,7 +84,6 @@ function initControls(callBack) {
 				MOUSEOVERPOLYGONS.push(POLYGONS[i]);
 				//activeSlider = POLYGONS[i].slider;
 				activeBar = POLYGONS[i].bar;
-
 			}
 		}
 
@@ -99,7 +100,7 @@ function initControls(callBack) {
 
 			activeSlider = MOUSEOVERPOLYGONS[tempI].slider;
 
-			console.log(activeBar);
+			//console.log(activeBar);
 			var foo = getValueFromIndex(activeSlider.activeday, activeBar).value * 10;
 			b = Math.round(foo)
 			bar = b / 10
@@ -125,6 +126,7 @@ function initControls(callBack) {
 	};
 
 	CANVAS.onclick = function(e) {
+		MOUSECLICKPOLYGONS = [];
 		var pt = {
 			x: e.clientX,
 			y: e.clientY
@@ -132,16 +134,38 @@ function initControls(callBack) {
 		pt.x -= CANVAS.offsetLeft;
 		pt.y -= CANVAS.offsetTop;
 		var activeBar = null;
+		var activeSlider = null;
+		var show = false;
 		for(var i = 0; i < POLYGONS.length; i++) {
 			if (POLYGONS[i].isPointInside(pt)) {
-				activeBar = i;
+				show = true;
+				MOUSECLICKPOLYGONS.push(POLYGONS[i]);
+				//activeSlider = POLYGONS[i].slider;
+				activeBar = POLYGONS[i].bar;
+				//activeBar = i;
 			}
 		}
-		var key = getKeyFromIndex(SLIDERS[0].activeday, activeBar);
 
-		if (typeof key != "undefined") {
-			drawGraphs(key);
-		} 
+		if (show){
+			var tempI = null;
+			var minValue = null;
+			for (var i = 0; i < MOUSECLICKPOLYGONS.length; i++) {
+				if(minValue == null || MOUSECLICKPOLYGONS[i].value < minValue) {
+					tempI = i;
+					minValue = MOUSECLICKPOLYGONS[i].value;
+				}
+			}
+			//console.log(MOUSECLICKPOLYGONS[tempI]);
+			activeSlider = MOUSECLICKPOLYGONS[tempI].slider;
+			var key = getKeyFromIndex(MOUSECLICKPOLYGONS[tempI].slider.year, activeBar);
+			var drawYear = MOUSECLICKPOLYGONS[tempI].slider.year;
+			//var key = getKeyFromIndex(MOUSECLICKPOLYGONS[tempI].slider.year, activeBar);
+			if (typeof key != "undefined") {
+				//console.log("AWAKE");
+				//console.log(key);
+				drawGraphs(key, drawYear);
+			} 
+		}
 	};
 
 	// PLUS BUTTON
@@ -153,11 +177,21 @@ function initControls(callBack) {
 			y: e.clientY
 		};
 		//console.log("TEST+");
+
+
 		for(var i = 0; i < YEARS.length; i++) {
 			if (!YEARS[i].active) {
 				var listEl = new ListEl(YEARS[i]);
 			}
 		}
+
+		this.button = document.createElement("button");
+		this.button.innerHTML = "close";
+		$(this.button).on("click", {obj:this}, function(event) {
+			$("#popup").fadeOut();
+		});
+		$("#popup").append(this.button);
+		
 		//var year = document.getElementById("year_input_1").value;
 		//console.log("YEAR: " + year);
 		var popupPosition = window.innerWidth/2 - 100;
@@ -225,7 +259,7 @@ function Slider(year){
 		this.div = document.createElement("div");
 		this.div.innerHTML = '<form oninput="rangeInput' + this.year + '.value;"><input name="' + this.year + '" class="bar rangeInput" type="range" id="rangeInput' + this.year + '" value="0"  min="0" max="' + this.max + '" />' +
 								'<span class="highlight"> </span><div id="dateview' + this.year + '" class="dateview"></div>' + 
-								'<button id="closeButton' + this.year + '"> X </button></form>';
+								'<span class="yearName">' + this.year + '</span> <button class="closeButton" id="closeButton' + this.year + '"> X </button></form>';
 		$("#sliders").append(this.div);
 		var closeButton = document.getElementById("closeButton" + this.year);
 		$(closeButton).on('click', {obj:this}, function (event) {
@@ -253,6 +287,7 @@ function Slider(year){
 				"display" : "block"
 			});
 			updateBars();
+			drawGraphs();
 		});
 	};
 }
@@ -332,28 +367,81 @@ function drawCircle(x, y, radius, color, context) {
 	context.fill();
 }
 
-function drawGraphs(key) {
+function clearGraph() {
+	if (typeof GRAPH_CONTEXT == "undefined") {
+		GRAPH_CANVAS = document.getElementById("graphCanvas");
+		GRAPH_CONTEXT = GRAPH_CANVAS.getContext("2d");
+	}
+	GRAPH_CONTEXT.clearRect(0, 0, GRAPH_CANVAS.width, GRAPH_CANVAS.height);
+	DRAWGRAPHARRAY = [];
+}
+
+
+
+function drawGraphs(key, year) {
+	//console.log("WAAA:" + key);
+	if(typeof key != "undefined" && typeof year != "undefined"){
+		DRAWGRAPHARRAY.push({
+			key: key,
+			year: year
+		});
+	}
+
 	var graph_width = 380;
 	var graph_height = 750;
 	GRAPH_CANVAS = document.getElementById("graphCanvas");
 	GRAPH_CONTEXT = GRAPH_CANVAS.getContext("2d");
 	GRAPH_CONTEXT.clearRect(0, 0, GRAPH_CANVAS.width, GRAPH_CANVAS.height);
+
+	// DRAW COORDINATE SYSTEM
 	GRAPH_CONTEXT.beginPath();
 	GRAPH_CONTEXT.moveTo(20,20);
 	GRAPH_CONTEXT.lineTo(20,graph_width);
 	GRAPH_CONTEXT.lineTo(graph_height,graph_width);
 	GRAPH_CONTEXT.stroke();
 	//console.log("GRAPH: " + AVERAGEVALUES.length);
-	for(var i=1; i <= AVERAGEVALUES.length; i++) {
-		var pointX = 20 + i*2;
-		if (typeof AVERAGEVALUES[i] != "undefined") {
-			var valueinpercent = (AVERAGEVALUES[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
-			var pointY = valueinpercent * 300;
-			GRAPH_CONTEXT.fillStyle = "#31CDD5";
-			drawCircle(pointX, 360-pointY, 1, "#000099", GRAPH_CONTEXT);
-			//GRAPH_CONTEXT.fillRect(pointX, 360 - pointY, 2, 2); // fill in the pixel at (10,10)
+	for (var j = 0; j < DRAWGRAPHARRAY.length; j++) {
+		var year = DRAWGRAPHARRAY[j].year;
+		var key = DRAWGRAPHARRAY[j].key;
+
+		var activeSlider = getSliderFromYear(year);
+		var values = activeSlider.averagevalues;
+		//console.log(values);
+
+		var color = null;
+		if (year == 2004) {
+			color = "green";
+		} else if (year == 2005) {
+			color = "blue";
+		} else if (year == 2006) {
+			color = "yellow";
+		} else if (year == 2007) {
+			color = "red";
+		} else {
+			color = "black";
 		}
-		//console.log("HERE: " + key);
+
+		var radius = 2;
+	
+
+
+		for(var i=0; i <= values.length; i++) {
+			var pointX = 20 + i*2;
+			if (typeof values[i] != "undefined") {
+				if (values[i].datetime == activeSlider.activeday.datetime){
+					radius = 10;
+				} else {
+					radius = 2;
+				}
+				//console.log("HERE: " + AVERAGEVALUES[i][key]);
+				var valueinpercent = (values[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
+				var pointY = valueinpercent * 300;
+				GRAPH_CONTEXT.fillStyle = "#31CDD5";
+				drawCircle(pointX, 360-pointY, radius, color, GRAPH_CONTEXT);
+				//GRAPH_CONTEXT.fillRect(pointX, 360 - pointY, 2, 2); // fill in the pixel at (10,10)
+			}
+			//console.log("HERE: " + key);
+		}
 	}
 }
 
@@ -391,7 +479,7 @@ function updateBars() {
 
 	//CONTEXT.fillStyle = "#00AAAA";
 
-	//console.log(SLIDERS);
+	console.log(SLIDERS);
 
 	for (var i = 0; i < SLIDERS.length; i++){
 		var tempBool = false;
