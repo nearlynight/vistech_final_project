@@ -7,7 +7,7 @@ var YEARS = [];
 
 
 function start() {
-	for(var i = 2004; i <= 2006; i++) {
+	for(var i = 2004; i <= 2008; i++) {
 		YEARS.push({
 			year: i,
 			active: false,
@@ -16,7 +16,7 @@ function start() {
 	}
 
 	YEARS[0].active = true;
-	YEARS[1].active = true;
+	//YEARS[1].active = true;
 	//YEARS[0].loaded = true;
 
 	loadData(function(result){
@@ -35,32 +35,60 @@ function start() {
 	
 }
 
-function ListEl(year) {
-	this.year = year;
-	this.div = document.createElement("div");
-	//div document.createElement("div")// element zum draufdruecken
-	//$(popup).append(div);
-	$("#popup").append(this.div);
+function ListEl(yearObj) {
+	//console.log(yearObj);
+	this.yearObj = yearObj;
+	this.button = document.createElement("button");// element zum draufdruecken
+	this.button.innerHTML = this.yearObj.year;
+	$("#popup").append(this.button);
+	//$('#button' + this.year)
 	// event.data.obj
-	div.onclick ... {obj:this}, function(event) {
-		loadData(function(result) {
-			//console.log(result);
-			prepareData(result, function(data){
-				//console.log(data);
-				calculateAverage(data, function(data){
-					createSliders();
-					updateBars();
+
+	$(this.button).on("click", {obj:this}, function(event) {
+		var that = event.data.obj;
+		for(var i = 0; i < YEARS.length; i++) {
+			if (YEARS[i].year == that.yearObj.year) {
+				YEARS[i].active = true;
+			}
+		}
+		//console.log("LOADED: " + that.yearObj);
+		if (that.yearObj.loaded) {
+			createSliders();
+			updateBars();
+		} else {
+			loadData(function(result) {
+				//console.log(result);
+				prepareData(result, function(data){
+					//console.log(data);
+					calculateAverage(data, function(data){
+						//console.log(AVERAGEVALUES);
+						createSliders();
+						updateBars();
+					}); 
 				});
-			});
-		},[event.data.obj.year]);
+			},[that.yearObj]);
+		}
+	});
 }
 
 
 	
 function existSlider(year){
 	for (var i = 0; i < SLIDERS.length; i++) {
-		if(SLIDERS[i].year == year){
-			return true;
+		if (SLIDERS[i] != null){
+			if(SLIDERS[i].year == year){
+				return true;
+			}
+		}
+	}
+}
+
+function getSliderFromYear(year){
+	for (var i = 0; i < SLIDERS.length; i++) {
+		if (SLIDERS[i] != null){
+			if(SLIDERS[i].year == year){
+				return SLIDERS[i];
+			}
 		}
 	}
 }
@@ -71,6 +99,9 @@ function createSliders() {
 			var newSlider = new Slider(YEARS[j].year);
 			newSlider.show();
 			SLIDERS.push(newSlider);			
+		} else if (YEARS[j].active && existSlider(YEARS[j].year)) {
+			$(getSliderFromYear(YEARS[j].year).div).fadeIn();
+
 		}
 	}
 }
@@ -81,54 +112,56 @@ function calculateAverage(data, callBack) {
 	var averRhSum = 0;
 	var averWvSum = 0;
 	var averRainSum = 0;
-	var j = 0;
+	var count = 0;
 	//console.log(data);
 	for (var i = 1; i < data.length; i++) {
-		averTempSum = averTempSum + data[i].temp;
-		averPSum = averPSum + data[i].p;
-		averRhSum = averRhSum + data[i].rh;
-		averWvSum = averWvSum + data[i].wv;
-		averRainSum = averRainSum + data[i].rain;
-		++j;
-		//console.log("avg" + averTemp);
+		if(data[i].temp != -9999.00 || data[i].p != -9999.00 || data[i].rh != -9999.00 || data[i].wv != -9999.00 || data[i].rain != -9999.00) {
+			averTempSum = averTempSum + data[i].temp;
+			averPSum = averPSum + data[i].p;
+			averRhSum = averRhSum + data[i].rh;
+			averWvSum = averWvSum + data[i].wv;
+			averRainSum = averRainSum + data[i].rain;
+			++count;
+			//console.log("avg" + averTemp);
 
-		if (i == data.length-1 || data[i].datetime.getDay() != data[i+1].datetime.getDay()) {
-			var averTemp = 0;
-			var averP = 0;
-			var averRh = 0;
-			var averWv = 0;
-			var averRain = 0;
+			if (i == data.length-1 || data[i].datetime.getDay() != data[i+1].datetime.getDay()) {
+				var averTemp = 0;
+				var averP = 0;
+				var averRh = 0;
+				var averWv = 0;
+				var averRain = 0;
 
-			averTemp = averTempSum / j;
-			averP = averPSum / j;
-			averRh = averRhSum / j;
-			averWv = averWvSum / j;
-			averRain = averRainSum;
+				averTemp = averTempSum / count;
+				averP = averPSum / count;
+				averRh = averRhSum / count;
+				averWv = averWvSum / count;
+				averRain = averRainSum;
 
-			var averObj = {
-				datetime: data[i].datetime,
-				temp: averTemp,
-				p: averP,
-				rh: averRh,
-				wv: averWv,
-				rain: averRain
-			}
+				var averObj = {
+					datetime: data[i].datetime,
+					temp: averTemp,
+					p: averP,
+					rh: averRh,
+					wv: averWv,
+					rain: averRain
+				}
 
-			AVERAGEVALUES.push(averObj);
+				AVERAGEVALUES.push(averObj);
 
-			j = 0;
-			averTempSum = 0;
-			averPSum = 0;
-			averRhSum = 0;
-			averWvSum = 0;
-			averRainSum = 0;
+				count = 0;
+				averTempSum = 0;
+				averPSum = 0;
+				averRhSum = 0;
+				averWvSum = 0;
+				averRainSum = 0;
 
-/*			console.log(i + " temp: " + averTemp);
-			console.log(i + " p: " + averP);
-			console.log(i + " rh: " + averRh);
-			console.log(i + " wv: " + averWv);
-			console.log(i + " rain: " + averRain);*/
-		}		
+	/*			console.log(i + " temp: " + averTemp);
+				console.log(i + " p: " + averP);
+				console.log(i + " rh: " + averRh);
+				console.log(i + " wv: " + averWv);
+				console.log(i + " rain: " + averRain);*/
+			}	
+		}	
 	}
 	//console.log(AVERAGEVALUES.length);
 	saveMinMax();
@@ -274,4 +307,31 @@ Date.prototype.toDayMonth = function() {
 	return monthNames[this.getUTCMonth()] + " " + twoDigits(this.getUTCDate());
 };
 
-
+Array.prototype.Sort = function(sortBy, callBack) {
+	if(this.length > 1) {		
+		var progress = true;
+		while(progress) {
+			progress = false;			
+			for(var i = 1; i < this.length; i++) {
+				if(typeof sortBy !== 'undefined') {
+					if(this[i][sortBy] < this[i - 1][sortBy]) {
+						var temp = this[i];
+						this[i] = this[i - 1];
+						this[i - 1] = temp;
+						progress = true;
+					}		
+				} else {
+					if(this[i] < this[i - 1]) {
+						var temp = this[i];
+						this[i] = this[i - 1];
+						this[i - 1] = temp;
+						progress = true;
+					}		
+				}
+			}
+		}
+		callBack(this);
+	} else {
+		console.log("Warning: tried to sort array with one element.");
+	}
+};

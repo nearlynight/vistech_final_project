@@ -52,6 +52,7 @@ body {
 
 .rangeInput {
 	width: 800px;
+    margin-top: 20px;
 }
 
 .dateview {
@@ -95,13 +96,14 @@ body {
 }
 
 #year_input_1 {
+    display: none;
 
 }
 
 #popup {
     display: none;
-    background-color: red;
+    background-color: rgba(120,120,120,0.5);
     position: fixed;
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
 }

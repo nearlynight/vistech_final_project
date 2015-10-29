@@ -12,6 +12,7 @@ var DAYBARWIDTH = 600;
 //var ACTIVEDAY = 1;
 var POLYGONS = [];
 var SLIDERS = [];
+var MOUSEOVERPOLYGONS = [];
 var RANGE = {
 	temp: {
 		min: -7,
@@ -63,6 +64,7 @@ function initControls(callBack) {
 	CONTEXT = CANVAS.getContext("2d");
 
 	CANVAS.onmousemove = function(e) {
+		MOUSEOVERPOLYGONS = [];
 		var pt = {
 			x: e.clientX,
 			y: e.clientY
@@ -73,15 +75,30 @@ function initControls(callBack) {
 		var show = false;
 		var activeBar = null;
 		var activeSlider = null;
+
 		for(var i = 0; i < POLYGONS.length; i++) {
 			if (POLYGONS[i].isPointInside(pt)) {
 				show = true;
-				activeSlider = POLYGONS[i].slider;
-				activeBar = i % AMOUNTBARS;
+				MOUSEOVERPOLYGONS.push(POLYGONS[i]);
+				//activeSlider = POLYGONS[i].slider;
+				activeBar = POLYGONS[i].bar;
+
 			}
 		}
+
 		if (show == true) {
 			//console.log("POINT INSIDE: " + i);
+			var tempI = null;
+			var minValue = null;
+			for (var i = 0; i < MOUSEOVERPOLYGONS.length; i++) {
+				if(minValue == null || MOUSEOVERPOLYGONS[i].value < minValue) {
+					tempI = i;
+					minValue = MOUSEOVERPOLYGONS[i].value;
+				}
+			}
+
+			activeSlider = MOUSEOVERPOLYGONS[tempI].slider;
+
 			console.log(activeBar);
 			var foo = getValueFromIndex(activeSlider.activeday, activeBar).value * 10;
 			b = Math.round(foo)
@@ -120,30 +137,40 @@ function initControls(callBack) {
 				activeBar = i;
 			}
 		}
-		var key = getKeyFromIndex(ACTIVEDAY, activeBar);
+		var key = getKeyFromIndex(SLIDERS[0].activeday, activeBar);
 
 		if (typeof key != "undefined") {
 			drawGraphs(key);
 		} 
 	};
 
+	// PLUS BUTTON
 	var plus_button = document.getElementById("add_year");
 	plus_button.onclick = function(e) {
+		$("#popup").empty();
 		var pt = {
 			x: e.clientX,
 			y: e.clientY
 		};
-		console.log("TEST+");
-		var year = document.getElementById("year_input_1").value;
-		console.log("YEAR: " + year);
+		//console.log("TEST+");
+		for(var i = 0; i < YEARS.length; i++) {
+			if (!YEARS[i].active) {
+				var listEl = new ListEl(YEARS[i]);
+			}
+		}
+		//var year = document.getElementById("year_input_1").value;
+		//console.log("YEAR: " + year);
 		var popupPosition = window.innerWidth/2 - 100;
 		$("#popup").css({
 				"left" : (window.innerWidth/2 - 100) + "px",
 				"top" : (window.innerHeight/2 -100) + "px"
 			});
-		$("popup").html("");
+		//$("#popup").html("");
 		$("#popup").fadeIn();
 	}
+	$("#popup").on("click", function(e){
+		$(this).fadeOut();
+	});
 	if(typeof callBack != "undefined") {
 		callBack();
 	}
@@ -165,13 +192,13 @@ function Slider(year){
 	this.min = 0;
 	this.max = CountElementsOfYear(this.year);
 	this.averagevalues = [];
-	this.color = "rgba(250,0,0,0.5)";
+	this.color = "red";
 	if (this.year == 2004) {
-		this.color = "rgba(0,255,0,0.5)";
+		this.color = "green";
 	} else if (this.year == 2005) {
-		this.color = "rgba(0,0,255,0.5)";
+		this.color = "blue";
 	} else if (this.year == 2006) {
-		this.color = "rgba(250,0,0,0.5)";
+		this.color = "yellow";
 	}
 	
 	for (var i = 0; i < AVERAGEVALUES.length; i++) {
@@ -180,10 +207,34 @@ function Slider(year){
 		}
 	}
 	this.activeday = this.averagevalues[0];
+	this.removeYear = function() {
+		$(this.div).fadeOut();
+/*		for (var i = 0; i < SLIDERS.length; i++) {
+			if (SLIDERS[i].year == this.year) {
+				SLIDERS[i] = null;
+			}
+		}*/
+
+		for(var j = 0; j < YEARS.length; j++) {
+			if (YEARS[j].year == this.year){
+				YEARS[j].active = false;		
+			}
+		}
+	};
 	this.show = function (){
 		this.div = document.createElement("div");
-		this.div.innerHTML = '<form oninput="rangeInput' + this.year + '.value;"><input name="' + this.year + '" class="bar rangeInput" type="range" id="rangeInput' + this.year + '" value="0"  min="0" max="' + this.max + '" /><span class="highlight"> </span><div id="dateview' + this.year + '" class="dateview"></div></form>';
+		this.div.innerHTML = '<form oninput="rangeInput' + this.year + '.value;"><input name="' + this.year + '" class="bar rangeInput" type="range" id="rangeInput' + this.year + '" value="0"  min="0" max="' + this.max + '" />' +
+								'<span class="highlight"> </span><div id="dateview' + this.year + '" class="dateview"></div>' + 
+								'<button id="closeButton' + this.year + '"> X </button></form>';
 		$("#sliders").append(this.div);
+		var closeButton = document.getElementById("closeButton" + this.year);
+		$(closeButton).on('click', {obj:this}, function (event) {
+			var that = event.data.obj;
+			event.preventDefault();
+			that.removeYear();
+			updateBars();
+		});
+
 		$('#rangeInput' + this.year).on('input', {obj:this}, function (event) {
 			var that = event.data.obj;
 			var rangeEl = document.getElementById("rangeInput" + that.year);
@@ -198,7 +249,7 @@ function Slider(year){
 			var dateLeftPosition = (DAYBARWIDTH / (that.averagevalues.length-1)) * value;
 			$(dateviewEl).css({
 				"left" : (CANVAS.offsetLeft + dateLeftPosition) + "px",
-				"top" : (rangeEl.offsetTop + rangeEl.offsetHeight*2) + "px",
+				"top" : (rangeEl.offsetTop + rangeEl.offsetHeight*2 + 0) + "px",
 				"display" : "block"
 			});
 			updateBars();
@@ -210,12 +261,14 @@ function toRadians(angle) {
 	return angle * (Math.PI / 180);
 }
 
-function Polygon(p1, p2, p3, p4, slider) {
+function Polygon(p1, p2, p3, p4, slider, value, bar) {
 	this.p1 = p1;
 	this.p2 = p2;
 	this.p3 = p3;
 	this.p4 = p4;
 	this.slider = slider;
+	this.value = value;
+	this.bar = bar;
 	this.draw = function() {
 		if(this.slider != null){
 			CONTEXT.fillStyle = this.slider.color;
@@ -242,7 +295,7 @@ function Polygon(p1, p2, p3, p4, slider) {
 
 }
 
-function createPolygon(angle1, angle2, value, slider) {
+function createPolygon(angle1, angle2, value, slider, barnumber) {
 	var p1 = {};
 	var p2 = {};
 	var p3 = {};
@@ -260,7 +313,7 @@ function createPolygon(angle1, angle2, value, slider) {
 	p4.x = CANVAS.width/2 - Math.sin(toRadians(90) - angle1) * R1;
 	p4.y = CANVAS.height - Math.sin(angle1) * R1;
 
-	var poly = new Polygon(p1, p2, p3, p4, slider);
+	var poly = new Polygon(p1, p2, p3, p4, slider, value, barnumber);
 	return poly;
 }
 
@@ -316,8 +369,6 @@ function drawLabel(trans, rota, text, color) {
 
 function updateBars() {
 	CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
-	
 	var DAYbarwidth = (ENDANGLE - (2 * STARTANGLE) - ((AMOUNTBARS -1) * ANGLEBETWEENBARS)) / AMOUNTBARS;
 
 	// draw background of bars
@@ -343,47 +394,60 @@ function updateBars() {
 	//console.log(SLIDERS);
 
 	for (var i = 0; i < SLIDERS.length; i++){
-		// adapt values to percentage
-		if(typeof RANGE.temp == "undefined")
-			var temp = (SLIDERS[i].activeday.temp - RANGE.temp.min) / (RANGE.temp.max - RANGE.temp.min); 
-		else
-			var temp = (SLIDERS[i].activeday.temp - getMinMax("temp").min) / (getMinMax("temp").max - getMinMax("temp").min); 	
-		if(typeof RANGE.rain == "undefined")
-			var rain = (SLIDERS[i].activeday.rain - RANGE.rain.min) / (RANGE.rain.max - RANGE.rain.min); 
-		else
-			var rain = (SLIDERS[i].activeday.rain - getMinMax("rain").min) / (getMinMax("rain").max - getMinMax("rain").min); 
-		if(typeof RANGE.wv == "undefined")
-			var wv = (SLIDERS[i].activeday.wv - RANGE.wv.min) / (RANGE.wv.max - RANGE.wv.min); 
-		else
-			var wv = (SLIDERS[i].activeday.wv - getMinMax("wv").min) / (getMinMax("wv").max - getMinMax("wv").min); 
-		if(typeof RANGE.p == "undefined")
-			var p = (SLIDERS[i].activeday.p - RANGE.p.min) / (RANGE.p.max - RANGE.p.min); 
-		else
-			var p = (SLIDERS[i].activeday.p - getMinMax("p").min) / (getMinMax("p").max - getMinMax("p").min);
-		if(typeof RANGE.rh == "undefined")
-			var rh = (SLIDERS[i].activeday.rh - RANGE.rh.min) / (RANGE.rh.max - RANGE.rh.min); 
-		else
-			var rh = (SLIDERS[i].activeday.rh - getMinMax("rh").min) / (getMinMax("rh").max - getMinMax("rh").min); 
-
-		//console.log("ACTIVE DAY WV: " + ACTIVEDAY.wv);
-
-		//console.log(ACTIVEDAY);
-		//console.log(getMinMax("temp"));
-		//console.log(temp);
-
-		var v = [temp, rain, wv, p, rh];
-
-		for (var j = 0; j < v.length; ++j) {
-			//console.log("DUDE!");
-			var poly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * j + DAYbarwidth * j, 
-										STARTANGLE + ANGLEBETWEENBARS * j + DAYbarwidth * (j+1), 
-										v[j], SLIDERS[i]);
-			//console.log(poly);
-			poly.draw();
-			POLYGONS.push(poly);
+		var tempBool = false;
+		for(var j = 0; j < YEARS.length; j++) {
+			if (YEARS[j].year == SLIDERS[i].year && YEARS[j].active){
+				tempBool = true;
+			}
 		}
+		if(tempBool){
+			// adapt values to percentage
+			if(typeof RANGE.temp == "undefined")
+				var temp = (SLIDERS[i].activeday.temp - RANGE.temp.min) / (RANGE.temp.max - RANGE.temp.min); 
+			else
+				var temp = (SLIDERS[i].activeday.temp - getMinMax("temp").min) / (getMinMax("temp").max - getMinMax("temp").min); 	
+			if(typeof RANGE.rain == "undefined")
+				var rain = (SLIDERS[i].activeday.rain - RANGE.rain.min) / (RANGE.rain.max - RANGE.rain.min); 
+			else
+				var rain = (SLIDERS[i].activeday.rain - getMinMax("rain").min) / (getMinMax("rain").max - getMinMax("rain").min); 
+			if(typeof RANGE.wv == "undefined")
+				var wv = (SLIDERS[i].activeday.wv - RANGE.wv.min) / (RANGE.wv.max - RANGE.wv.min); 
+			else
+				var wv = (SLIDERS[i].activeday.wv - getMinMax("wv").min) / (getMinMax("wv").max - getMinMax("wv").min); 
+			if(typeof RANGE.p == "undefined")
+				var p = (SLIDERS[i].activeday.p - RANGE.p.min) / (RANGE.p.max - RANGE.p.min); 
+			else
+				var p = (SLIDERS[i].activeday.p - getMinMax("p").min) / (getMinMax("p").max - getMinMax("p").min);
+			if(typeof RANGE.rh == "undefined")
+				var rh = (SLIDERS[i].activeday.rh - RANGE.rh.min) / (RANGE.rh.max - RANGE.rh.min); 
+			else
+				var rh = (SLIDERS[i].activeday.rh - getMinMax("rh").min) / (getMinMax("rh").max - getMinMax("rh").min); 
 
+			//console.log("ACTIVE DAY WV: " + ACTIVEDAY.wv);
+
+			//console.log(ACTIVEDAY);
+			//console.log(getMinMax("temp"));
+			//console.log(temp);
+
+			var v = [temp, rain, wv, p, rh];
+
+			for (var j = 0; j < v.length; ++j) {
+				//console.log("DUDE!");
+				var poly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * j + DAYbarwidth * j, 
+											STARTANGLE + ANGLEBETWEENBARS * j + DAYbarwidth * (j+1), 
+											v[j], SLIDERS[i], j);
+				//console.log(poly);
+				//poly.draw();
+				POLYGONS.push(poly);
+			}
+		}
 	}
+	POLYGONS.Sort("value", function(sortedArray){
+		for(var i = sortedArray.length-1; i >= 0; i--) {
+			sortedArray[i].draw();
+		}
+	});
+
 }
 
 

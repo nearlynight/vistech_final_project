@@ -1,4 +1,5 @@
 function loadData(callBack, years) {
+	//console.log("call arrived");
 	var loadedData = [];
 	var toLoad = 0;
 	var loaded = 0;
