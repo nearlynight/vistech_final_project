@@ -345,20 +345,22 @@ function Slider(year){
 
 			// get active day
 			var value = parseInt($(rangeEl).val(), 10);
-			that.activeday = that.averagevalues[value];
-			
-			// dateview position calculation
-			$(dateviewEl).html(that.averagevalues[value].datetime.toDayMonth());
-			var dateLeftPosition = (DAYBARWIDTH / (that.averagevalues.length)) * value;
-			$(dateviewEl).css({
-				"left" : (CANVAS.offsetLeft + dateLeftPosition - 20) + "px",
-				"top" : (rangeEl.offsetTop + rangeEl.offsetHeight*2 - 35) + "px",
-				"display" : "block",
-				"height" : "5px",
-				"background-color": color
-			});
-			updateBars();
-			drawGraphs();
+			if (typeof that.averagevalues[value] != "undefined" ) {
+				that.activeday = that.averagevalues[value];
+				
+				// dateview position calculation
+				$(dateviewEl).html(that.averagevalues[value].datetime.toDayMonth());
+				var dateLeftPosition = (DAYBARWIDTH / (that.averagevalues.length)) * value;
+				$(dateviewEl).css({
+					"left" : (CANVAS.offsetLeft + dateLeftPosition - 20) + "px",
+					"top" : (rangeEl.offsetTop + rangeEl.offsetHeight*2 - 35) + "px",
+					"display" : "block",
+					"height" : "5px",
+					"background-color": color
+				});
+				updateBars();
+				drawGraphs();
+			}
 		});
 	};
 }
@@ -469,8 +471,8 @@ function drawGraphs(key, year) {
 
 	// DRAW COORDINATE SYSTEM
 	GRAPH_CONTEXT.beginPath();
-	GRAPH_CONTEXT.moveTo(20,20);
-	GRAPH_CONTEXT.lineTo(20,graph_height);
+	GRAPH_CONTEXT.moveTo(20,graph_height);
+	//GRAPH_CONTEXT.lineTo(20,graph_height);
 	GRAPH_CONTEXT.lineTo(graph_width,graph_height);
 	GRAPH_CONTEXT.lineWidth = 2;
 	GRAPH_CONTEXT.strokeStyle = "black";
@@ -502,7 +504,7 @@ function drawGraphs(key, year) {
 
 		var activeSlider = getSliderFromYear(year);
 		var values = activeSlider.averagevalues;
-		//console.log(values);
+
 
 		var color = null;
 		if (year == 2004) {
@@ -539,17 +541,23 @@ function drawGraphs(key, year) {
 			var pointX = 20 + i*2;
 			var pointX_2 = 20 + (i+1)*2;
 			if (typeof values[i] != "undefined") {
+
+				var valueinpercent = (values[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
+				var pointY = valueinpercent * graph_plot_compression;
+
+				//console.log(values[i][key]);
+
 				if (values[i].datetime == activeSlider.activeday.datetime){
 					radius = 7;
 				} else {
-					radius = 2;
+					radius = 0;
 				}
 				//console.log("HERE: " + AVERAGEVALUES[i][key]);
-				var valueinpercent = (values[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
+				//var valueinpercent = (values[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
 
 				//console.log(values[i+1][key]);
 				//var valueinpercent_2 = (values[i][key] - getMinMax(key).min) / (getMinMax(key).max - getMinMax(key).min);
-				var pointY = valueinpercent * graph_plot_compression;
+				//var pointY = valueinpercent * graph_plot_compression;
 				//var pointY_2 = valueinpercent_2 * 300;
 				GRAPH_CONTEXT.fillStyle = "#31CDD5";
 
@@ -559,14 +567,31 @@ function drawGraphs(key, year) {
 				GRAPH_CONTEXT.moveTo(pointX,graph_plot_position_y - valueinpercent_temp);
 				GRAPH_CONTEXT.lineTo(pointX_2,graph_plot_position_y - pointY);
 				//GRAPH_CONTEXT.lineTo(graph_height,graph_width);
-				GRAPH_CONTEXT.lineWidth = .2;
-				GRAPH_CONTEXT.strokeStyle = "black";
+				GRAPH_CONTEXT.lineWidth = 2;
+				GRAPH_CONTEXT.strokeStyle = color;
 				GRAPH_CONTEXT.stroke();
 
 				valueinpercent_temp = valueinpercent * graph_plot_compression;
 
 				drawCircle(pointX, graph_plot_position_y - pointY, radius, color, GRAPH_CONTEXT);
 				//GRAPH_CONTEXT.fillRect(pointX, 360 - pointY, 2, 2); // fill in the pixel at (10,10)
+
+				if (values[i].datetime == activeSlider.activeday.datetime){
+
+					GRAPH_CONTEXT.fillStyle = "#E4E4E4";
+					//GRAPH_CONTEXT.fillStyle = "red";
+					GRAPH_CONTEXT.fillRect(pointX - 33, graph_plot_position_y - pointY - 7, 25, 15);
+
+					var foo = values[i][key] * 10;
+					b = Math.round(foo)
+					bar = b / 10
+
+					GRAPH_CONTEXT.fillStyle = "black";
+					GRAPH_CONTEXT.font = "10px Roboto";
+					GRAPH_CONTEXT.fillText(bar, pointX -30, graph_plot_position_y - pointY +4);
+					
+					//radius = 7;
+				}
 			}
 			//console.log("HERE: " + key);
 		}
