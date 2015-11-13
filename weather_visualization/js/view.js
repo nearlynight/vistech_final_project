@@ -314,29 +314,29 @@ function Slider(year){
 								'<span class="yearName">' + this.year + '</span> <button class="closeButton" id="closeButton' + this.year + '"> X </button></form>';
 		$("#sliders").append(this.div);
 
-		var sliderColor = "black,";
+		var sliderColor = "rgba(0,0,0,1),";
 		//console.log("SLIDER ADDED");
 		for (var i = 0; i < this.averagevalues.length; i++) {
 			if (this.averagevalues[i].temp <= -15) {
-				sliderColor += " #e6e6e6,";
+				sliderColor += " rgba(0,0,0,.9),";
 			} else if (this.averagevalues[i].temp <= -10) {
-				sliderColor += " #cccccc,";
+				sliderColor += " rgba(0,0,0,.8),";
 			} else if (this.averagevalues[i].temp <= -5) {
-				sliderColor += " #b3b3b3,";
+				sliderColor += " rgba(0,0,0,.7),";
 			} else if (this.averagevalues[i].temp <= 0) {
-				sliderColor += " #999999,";
+				sliderColor += " rgba(0,0,0,.6),";
 			} else if (this.averagevalues[i].temp <= 5) {
-				sliderColor += " #808080,";
+				sliderColor += " rgba(0,0,0,.5),";
 			} else if (this.averagevalues[i].temp <= 10) {
-				sliderColor += " #666666,";
+				sliderColor += " rgba(0,0,0,.4),";
 			} else if (this.averagevalues[i].temp <= 15) {
-				sliderColor += " #4d4d4d,";
+				sliderColor += " rgba(0,0,0,.3),";
 			} else if (this.averagevalues[i].temp <= 20) {
-				sliderColor += " #333333,";
+				sliderColor += " rgba(0,0,0,.2),";
 			} else if (this.averagevalues[i].temp <= 25) {
-				sliderColor += " #1a1a1a,";
+				sliderColor += " rgba(0,0,0,.1),";
 			} else {
-				sliderColor += " #000000,";
+				sliderColor += " rgba(0,0,0,.0),";
 			}
 			//console.log(this.averagevalues[i].temp);
 		}

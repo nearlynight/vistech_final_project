@@ -27,7 +27,7 @@ input[type=range]:focus {
 input[type=range]:focus::-webkit-slider-runnable-track {
     /* background: linear-gradient(to right, #f2f2f2, #c4c4c4, #9b9b9b, #6d6d6d, #424242); */
     /* background: repeating-linear-gradient(to right, red, yellow 1%, green 1%); */
-    background: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.0);
 }
 
 #rangeInput2004 { 
