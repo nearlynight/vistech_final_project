@@ -17,7 +17,7 @@ var MOUSECLICKPOLYGONS = [];
 var DRAWGRAPHARRAY = [];
 
 // COLORS
-var	C1 = "#399DCC";
+var	C1 = "#1CC1E8";
 var C2 = "#6A8A99";
 var C3 = "#60FFDC";
 var C4 = "#FF897B";
@@ -25,10 +25,23 @@ var C5 = "#CC6C78";
 var C6 = "#FCDCC0";
 var C7 = "#833D1B";
 var C8 = "#1B3547";
-var C9 = "#E84E43";
-var C10 = "#317EAD";
+var C9 = "#dd77c7";
+var C10 = "#CEDC74";
 var C11 = "#57B644";
 var C12 = "#FF0D00";
+
+/*var	C1 = "#8dd3c7";
+var C2 = "#ffffb3";
+var C3 = "#bebada";
+var C4 = "#fb8072";
+var C5 = "#80b1d3";
+var C6 = "#fdb462";
+var C7 = "#b3de69";
+var C8 = "#fccde5";
+var C9 = "#d9d9d9";
+var C10 = "#bc80bd";
+var C11 = "#ccebc5";
+var C12 = "#ffed6f";*/
 
 
 var RANGE = {
@@ -94,6 +107,7 @@ function initControls(callBack) {
 		var activeBar = null;
 		var activeSlider = null;
 
+		// MOUSE OVER WHICH BAR?
 		for(var i = 0; i < POLYGONS.length; i++) {
 			if (POLYGONS[i].isPointInside(pt)) {
 				show = true;
@@ -103,6 +117,7 @@ function initControls(callBack) {
 			}
 		}
 
+		// SHOW SMALLER VALUES IN FRONT
 		if (show == true) {
 			//console.log("POINT INSIDE: " + i);
 			var tempI = null;
@@ -229,7 +244,7 @@ function initControls(callBack) {
 	}
 }
 
-function CountElementsOfYear(year) {
+function countElementsOfYear(year) {
 	var count = 0;
 	for (var i = 0; i < AVERAGEVALUES.length; i++) {
 		if(AVERAGEVALUES[i].datetime.getFullYear() == year) {
@@ -243,7 +258,7 @@ function Slider(year){
 	this.year = year;
 	this.position = 0;
 	this.min = 0;
-	this.max = CountElementsOfYear(this.year);
+	this.max = countElementsOfYear(this.year);
 	this.averagevalues = [];
 	this.color = C12;
 	if (this.year == 2004) {
@@ -298,6 +313,15 @@ function Slider(year){
 								'<span class="yearName">' + this.year + '</span> <button class="closeButton" id="closeButton' + this.year + '"> X </button></form>';
 		$("#sliders").append(this.div);
 
+		console.log("SLIDER ADDED");
+
+
+/*		CONTEXT.beginPath();
+		CONTEXT.lineWidth = "6";
+		CONTEXT.strokeStyle = "red";
+		CONTEXT.rect(5, 5, 730, 10);  
+		CONTEXT.stroke();*/
+
 		// CLOSE YEAR BUTTON
 		var closeButton = document.getElementById("closeButton" + this.year);
 		$(closeButton).on('click', {obj:this}, function (event) {
@@ -309,7 +333,7 @@ function Slider(year){
 
 
 
-
+		// THUMBNAIL OF SLIDER
 		$('#rangeInput' + this.year).on('input', {obj:this}, function (event) {
 			var that = event.data.obj;
 			var rangeEl = document.getElementById("rangeInput" + that.year);
@@ -343,8 +367,18 @@ function Slider(year){
 
 			$("slider-thumb").css({"border-top": "solid 20px red"});
 
-			// get active day
+			// get active day - position on slider [1,2,...,365]
 			var value = parseInt($(rangeEl).val(), 10);
+
+			// make slider transparent, draw temperatur grey values behind
+
+			// SLIDERCOLOR
+			// color = #grey * temperature
+			// slider color at position of value = color
+
+			console.log(that.averagevalues[value].temp);
+
+			// THUMBNAIL OF SLIDER
 			if (typeof that.averagevalues[value] != "undefined" ) {
 				that.activeday = that.averagevalues[value];
 				
@@ -379,8 +413,10 @@ function Polygon(p1, p2, p3, p4, slider, value, bar) {
 	this.bar = bar;
 	this.draw = function() {
 		if(this.slider != null){
+			// POLYGON COLOR
 			CONTEXT.fillStyle = this.slider.color;
 		} else {
+			// POLYGON DEFAULT BACKGROUND
 			CONTEXT.fillStyle = "#E0E0E0";
 		}
 		CONTEXT.beginPath();
@@ -547,6 +583,7 @@ function drawGraphs(key, year) {
 
 				//console.log(values[i][key]);
 
+				// HIGHLIGHT POINT ON SLIDER IN GRAPH
 				if (values[i].datetime == activeSlider.activeday.datetime){
 					radius = 7;
 				} else {
@@ -576,6 +613,8 @@ function drawGraphs(key, year) {
 				drawCircle(pointX, graph_plot_position_y - pointY, radius, color, GRAPH_CONTEXT);
 				//GRAPH_CONTEXT.fillRect(pointX, 360 - pointY, 2, 2); // fill in the pixel at (10,10)
 
+
+				// BACKGROUND OF VALUE BOX FOR ACTUAL HIGHLICHTED NUMBER IN GRAPH
 				if (values[i].datetime == activeSlider.activeday.datetime){
 
 					GRAPH_CONTEXT.fillStyle = "#E4E4E4";
@@ -598,6 +637,7 @@ function drawGraphs(key, year) {
 	}
 }
 
+// LABELS FOR POLYGONS
 function drawLabel(trans, rota, text, color) {
 	CONTEXT.translate(trans.x,trans.y);
 	CONTEXT.rotate(-rota * Math.PI/180);
@@ -617,7 +657,7 @@ function updateBars() {
 		var initPoly = createPolygon(STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * i, 
 									STARTANGLE + ANGLEBETWEENBARS * i + DAYbarwidth * (i+1), 
 									1.0, null);
-		initPoly.draw("#E0E0E0");
+		initPoly.draw();
 	}
 
 	//CONTEXT.rotate(45);

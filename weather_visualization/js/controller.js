@@ -19,6 +19,7 @@ function start() {
 	//YEARS[1].active = true;
 	//YEARS[0].loaded = true;
 
+	// RESULT = ACTIVE YEAR DATA IN ARRAY
 	loadData(function(result){
 		//console.log(result);
 		prepareData(result, function(data){
@@ -30,9 +31,7 @@ function start() {
 				});
 			});
 		});
-	}, 	YEARS);
-
-	
+	}, 	YEARS);	
 }
 
 function ListEl(yearObj) {

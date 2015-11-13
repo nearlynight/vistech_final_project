@@ -4,7 +4,7 @@ input[type=range]{
 
 input[type=range]::-webkit-slider-runnable-track {
     height: 5px;
-    background: #ddd;
+    background: #FF0000;
     border: none;
     border-radius: 3px;
 }
@@ -25,7 +25,13 @@ input[type=range]:focus {
 }
 
 input[type=range]:focus::-webkit-slider-runnable-track {
-    background: #ccc;
+    /* background: linear-gradient(to right, #f2f2f2, #c4c4c4, #9b9b9b, #6d6d6d, #424242); */
+    /* background: repeating-linear-gradient(to right, red, yellow 1%, green 1%); */
+    background: rgba(0,0,0,0.1);
+}
+
+#rangeInput2004 {
+    background-color: green;
 }
 
 body {
@@ -52,7 +58,7 @@ body {
     font-family: "Roboto" ;
     border: 0px solid rgb(192, 192, 192);
     border-radius: 2px;
-    background-color: white;
+    background-color: red;
 }
 
 #tooltip {
@@ -149,7 +155,6 @@ body {
     margin-top: 10px;
     padding: 3px;
 }
-
 
 .closeYearButton:hover {
     border: 2px solid;
