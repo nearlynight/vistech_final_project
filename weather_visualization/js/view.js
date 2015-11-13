@@ -199,6 +199,7 @@ function initControls(callBack) {
 		}
 	};
 
+
 	// PLUS BUTTON
 	var plus_button = document.getElementById("add_year");
 	plus_button.onclick = function(e) {
@@ -313,8 +314,39 @@ function Slider(year){
 								'<span class="yearName">' + this.year + '</span> <button class="closeButton" id="closeButton' + this.year + '"> X </button></form>';
 		$("#sliders").append(this.div);
 
-		console.log("SLIDER ADDED");
+		var sliderColor = "black,";
+		//console.log("SLIDER ADDED");
+		for (var i = 0; i < this.averagevalues.length; i++) {
+			if (this.averagevalues[i].temp <= -15) {
+				sliderColor += " #e6e6e6,";
+			} else if (this.averagevalues[i].temp <= -10) {
+				sliderColor += " #cccccc,";
+			} else if (this.averagevalues[i].temp <= -5) {
+				sliderColor += " #b3b3b3,";
+			} else if (this.averagevalues[i].temp <= 0) {
+				sliderColor += " #999999,";
+			} else if (this.averagevalues[i].temp <= 5) {
+				sliderColor += " #808080,";
+			} else if (this.averagevalues[i].temp <= 10) {
+				sliderColor += " #666666,";
+			} else if (this.averagevalues[i].temp <= 15) {
+				sliderColor += " #4d4d4d,";
+			} else if (this.averagevalues[i].temp <= 20) {
+				sliderColor += " #333333,";
+			} else if (this.averagevalues[i].temp <= 25) {
+				sliderColor += " #1a1a1a,";
+			} else {
+				sliderColor += " #000000,";
+			}
+			//console.log(this.averagevalues[i].temp);
+		}
+		sliderColor += " white";
+		
+		$('#rangeInput' + this.year).css({"background" : "linear-gradient(to right," + sliderColor + ")"});
 
+		//if(this.averagevalues)
+		//$('#rangeInput' + this.year).css({"background" : sliderColor});
+		
 
 /*		CONTEXT.beginPath();
 		CONTEXT.lineWidth = "6";
@@ -365,6 +397,7 @@ function Slider(year){
 			}
 
 
+
 			$("slider-thumb").css({"border-top": "solid 20px red"});
 
 			// get active day - position on slider [1,2,...,365]
@@ -376,7 +409,7 @@ function Slider(year){
 			// color = #grey * temperature
 			// slider color at position of value = color
 
-			console.log(that.averagevalues[value].temp);
+			//console.log(that.averagevalues[value].temp);
 
 			// THUMBNAIL OF SLIDER
 			if (typeof that.averagevalues[value] != "undefined" ) {
@@ -728,7 +761,6 @@ function updateBars() {
 			sortedArray[i].draw();
 		}
 	});
-
 }
 
 

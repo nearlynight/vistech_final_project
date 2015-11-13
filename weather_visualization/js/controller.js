@@ -222,7 +222,7 @@ function saveMinMax() {
 		wv: getMinMax("wv"),
 		rain: getMinMax("rain")
 	};
-	//console.log(EXTREMA);
+	console.log(EXTREMA.temp);
 }
 
 /*function createYearBar() {
