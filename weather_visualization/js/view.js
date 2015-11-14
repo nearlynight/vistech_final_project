@@ -114,6 +114,7 @@ function initControls(callBack) {
 				MOUSEOVERPOLYGONS.push(POLYGONS[i]);
 				//activeSlider = POLYGONS[i].slider;
 				activeBar = POLYGONS[i].bar;
+				//console.log(activeBar);
 			}
 		}
 
@@ -135,6 +136,7 @@ function initControls(callBack) {
 			var foo = getValueFromIndex(activeSlider.activeday, activeBar).value * 10;
 			b = Math.round(foo)
 			bar = b / 10
+			//console.log(activeSlider.activeday);
 			$("#tooltip").html(bar + " " + getValueFromIndex(activeSlider.activeday, activeBar).unit);
 
 			//var canvas = document.getElementById("myCanvas");
@@ -147,6 +149,20 @@ function initControls(callBack) {
 				"top" : (pt.y+10) + "px",
 				"display" : "block"
 			});
+
+			// DRAW POLYFON HIGHLIGHT HERE
+
+			//console.log(MOUSEOVERPOLYGONS[tempI].p1);
+
+			CONTEXT.strokeStyle = "rgba(255,0,0,1.0)";
+			CONTEXT.lineWidth = 5;
+			CONTEXT.beginPath();
+			CONTEXT.moveTo(MOUSEOVERPOLYGONS[tempI].p1.x, MOUSEOVERPOLYGONS[tempI].p1.y);
+			CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p2.x, MOUSEOVERPOLYGONS[tempI].p2.y);
+			CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p3.x, MOUSEOVERPOLYGONS[tempI].p3.y);
+			CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p4.x, MOUSEOVERPOLYGONS[tempI].p4.y);
+			CONTEXT.closePath();
+			CONTEXT.stroke();
 		} else {
 			$("#tooltip").css({
 				"left" : (pt.x) + "px",
@@ -174,6 +190,7 @@ function initControls(callBack) {
 				//activeSlider = POLYGONS[i].slider;
 				activeBar = POLYGONS[i].bar;
 				//activeBar = i;
+				//console.log(activeBar);
 			}
 		}
 
@@ -314,7 +331,7 @@ function Slider(year){
 								'<span class="yearName">' + this.year + '</span> <button class="closeButton" id="closeButton' + this.year + '"> X </button></form>';
 		$("#sliders").append(this.div);
 
-		var sliderColor = "rgba(0,0,0,1),";
+		var sliderColor = "rgba(0,0,0,0),";
 		//console.log("SLIDER ADDED");
 		for (var i = 0; i < this.averagevalues.length; i++) {
 			if (this.averagevalues[i].temp <= -15) {
@@ -452,6 +469,8 @@ function Polygon(p1, p2, p3, p4, slider, value, bar) {
 			// POLYGON DEFAULT BACKGROUND
 			CONTEXT.fillStyle = "#E0E0E0";
 		}
+		CONTEXT.strokeStyle = "rgba(0,0,0,0.8)";
+		CONTEXT.lineWidth = 1;
 		CONTEXT.beginPath();
 		CONTEXT.moveTo(this.p1.x, this.p1.y);
 		CONTEXT.lineTo(this.p2.x, this.p2.y);
