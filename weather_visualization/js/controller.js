@@ -16,6 +16,8 @@ function start() {
 	}
 
 	YEARS[0].active = true;
+	//YEARS[2].active = true;
+	//YEARS[5].active = true;
 	//YEARS[1].active = true;
 	//YEARS[0].loaded = true;
 

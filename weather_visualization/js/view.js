@@ -29,6 +29,7 @@ var C9 = "#dd77c7";
 var C10 = "#CEDC74";
 var C11 = "#57B644";
 var C12 = "#FF0D00";
+var barHighlightColor = "rgba(209,209,209,0.5)";
 
 /*var	C1 = "#8dd3c7";
 var C2 = "#ffffb3";
@@ -136,7 +137,9 @@ function initControls(callBack) {
 			var foo = getValueFromIndex(activeSlider.activeday, activeBar).value * 10;
 			b = Math.round(foo)
 			bar = b / 10
-			//console.log(activeSlider.activeday);
+			//console.log(activeSlider.activeday.datetime.getFullYear());
+			//console.log(getKeyFromIndex(activeSlider.activeday, activeBar));
+			
 			$("#tooltip").html(bar + " " + getValueFromIndex(activeSlider.activeday, activeBar).unit);
 
 			//var canvas = document.getElementById("myCanvas");
@@ -152,23 +155,74 @@ function initControls(callBack) {
 
 			// DRAW POLYFON HIGHLIGHT HERE
 
-			//console.log(MOUSEOVERPOLYGONS[tempI].p1);
+			// WHEN YEAR IS CLICKED SELECT OTHER YEARS
+			// activeSlider.activeday.datetime.getFullYear() == DRAWGRAPHARRAY[k].year
 
-			CONTEXT.strokeStyle = "rgba(255,0,0,1.0)";
-			CONTEXT.lineWidth = 5;
-			CONTEXT.beginPath();
-			CONTEXT.moveTo(MOUSEOVERPOLYGONS[tempI].p1.x, MOUSEOVERPOLYGONS[tempI].p1.y);
-			CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p2.x, MOUSEOVERPOLYGONS[tempI].p2.y);
-			CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p3.x, MOUSEOVERPOLYGONS[tempI].p3.y);
-			CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p4.x, MOUSEOVERPOLYGONS[tempI].p4.y);
-			CONTEXT.closePath();
-			CONTEXT.stroke();
+			// IF KEY IS CLICKED SELECT OTHER KEYS
+			// DRAWGRAPHARRAY[k].key == getKeyFromIndex(activeSlider.activeday, activeBar)
+
+			//console.log(MOUSEOVERPOLYGONS[tempI]);
+			//for (var k = 0; k < DRAWGRAPHARRAY.length; k++){
+			if (DRAWGRAPHARRAY.length > 0 ) {
+				if (activeSlider.activeday.datetime.getFullYear() == DRAWGRAPHARRAY[0].year || DRAWGRAPHARRAY[0].key == getKeyFromIndex(activeSlider.activeday, activeBar)) {
+					if (DRAWGRAPHARRAY.length > 1){
+						if (getKeyFromIndex(activeSlider.activeday, activeBar) == DRAWGRAPHARRAY[1].key) {
+							console.log("in same key");
+
+							CONTEXT.strokeStyle = barHighlightColor;
+							CONTEXT.lineWidth = 2;
+							CONTEXT.beginPath();
+							CONTEXT.moveTo(MOUSEOVERPOLYGONS[tempI].p1.x, MOUSEOVERPOLYGONS[tempI].p1.y);
+							CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p2.x, MOUSEOVERPOLYGONS[tempI].p2.y);
+							CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p3.x, MOUSEOVERPOLYGONS[tempI].p3.y);
+							CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p4.x, MOUSEOVERPOLYGONS[tempI].p4.y);
+							CONTEXT.closePath();
+							CONTEXT.stroke();
+							console.log(DRAWGRAPHARRAY[0].year + " " + DRAWGRAPHARRAY[1].year)
+						} else if (activeSlider.activeday.datetime.getFullYear() == DRAWGRAPHARRAY[1].year) {
+							console.log("in same year");
+
+							CONTEXT.strokeStyle = barHighlightColor;
+							CONTEXT.lineWidth = 2;
+							CONTEXT.beginPath();
+							CONTEXT.moveTo(MOUSEOVERPOLYGONS[tempI].p1.x, MOUSEOVERPOLYGONS[tempI].p1.y);
+							CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p2.x, MOUSEOVERPOLYGONS[tempI].p2.y);
+							CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p3.x, MOUSEOVERPOLYGONS[tempI].p3.y);
+							CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p4.x, MOUSEOVERPOLYGONS[tempI].p4.y);
+							CONTEXT.closePath();
+							CONTEXT.stroke();
+						}
+					} else {
+						CONTEXT.strokeStyle = barHighlightColor;
+						CONTEXT.lineWidth = 2;
+						CONTEXT.beginPath();
+						CONTEXT.moveTo(MOUSEOVERPOLYGONS[tempI].p1.x, MOUSEOVERPOLYGONS[tempI].p1.y);
+						CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p2.x, MOUSEOVERPOLYGONS[tempI].p2.y);
+						CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p3.x, MOUSEOVERPOLYGONS[tempI].p3.y);
+						CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p4.x, MOUSEOVERPOLYGONS[tempI].p4.y);
+						CONTEXT.closePath();
+						CONTEXT.stroke();
+					}
+				} 
+			} else if (DRAWGRAPHARRAY.length == 0) {
+				//CONTEXT.strokeStyle = "rgba(150,150,150,1.0)";
+				CONTEXT.strokeStyle = barHighlightColor;
+				CONTEXT.lineWidth = 2;
+				CONTEXT.beginPath();
+				CONTEXT.moveTo(MOUSEOVERPOLYGONS[tempI].p1.x, MOUSEOVERPOLYGONS[tempI].p1.y);
+				CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p2.x, MOUSEOVERPOLYGONS[tempI].p2.y);
+				CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p3.x, MOUSEOVERPOLYGONS[tempI].p3.y);
+				CONTEXT.lineTo(MOUSEOVERPOLYGONS[tempI].p4.x, MOUSEOVERPOLYGONS[tempI].p4.y);
+				CONTEXT.closePath();
+				CONTEXT.stroke();
+			}
 		} else {
 			$("#tooltip").css({
 				"left" : (pt.x) + "px",
 				"top" : pt.y + "px",
 				"display" : "none"
 			});
+			updateBars();
 		}
 	};
 
@@ -193,7 +247,6 @@ function initControls(callBack) {
 				//console.log(activeBar);
 			}
 		}
-
 		if (show){
 			var tempI = null;
 			var minValue = null;
@@ -203,15 +256,26 @@ function initControls(callBack) {
 					minValue = MOUSECLICKPOLYGONS[i].value;
 				}
 			}
-			//console.log(MOUSECLICKPOLYGONS[tempI]);
+			
 			activeSlider = MOUSECLICKPOLYGONS[tempI].slider;
 			var key = getKeyFromIndex(MOUSECLICKPOLYGONS[tempI].slider.year, activeBar);
 			var drawYear = MOUSECLICKPOLYGONS[tempI].slider.year;
 			//var key = getKeyFromIndex(MOUSECLICKPOLYGONS[tempI].slider.year, activeBar);
-			if (typeof key != "undefined") {
-				//console.log("AWAKE");
-				//console.log(key);
-				drawGraphs(key, drawYear);
+			if (typeof key != "undefined" && DRAWGRAPHARRAY.length == 0) {
+				drawGraphs(drawYear, key);
+				//console.log(DRAWGRAPHARRAY);
+			} else {
+				if (activeSlider.activeday.datetime.getFullYear() == DRAWGRAPHARRAY[0].year || DRAWGRAPHARRAY[0].key == getKeyFromIndex(activeSlider.activeday, activeBar)) {
+					if (DRAWGRAPHARRAY.length > 1){
+						if (getKeyFromIndex(activeSlider.activeday, activeBar) == DRAWGRAPHARRAY[1].key) {
+							drawGraphs(drawYear, key);
+						} else if (activeSlider.activeday.datetime.getFullYear() == DRAWGRAPHARRAY[1].year) {
+							drawGraphs(drawYear, key);
+						}
+					} else {
+						drawGraphs(drawYear, key);
+					}
+				}
 			} 
 		}
 	};
@@ -539,12 +603,12 @@ function clearGraph() {
 
 
 
-function drawGraphs(key, year) {
+function drawGraphs(year, key) {
 	//console.log("WAAA:" + key);
 	if(typeof key != "undefined" && typeof year != "undefined"){
 		DRAWGRAPHARRAY.push({
-			key: key,
-			year: year
+			year: year,
+			key: key
 		});
 	}
 
@@ -589,6 +653,8 @@ function drawGraphs(key, year) {
 	for (var j = 0; j < DRAWGRAPHARRAY.length; j++) {
 		var year = DRAWGRAPHARRAY[j].year;
 		var key = DRAWGRAPHARRAY[j].key;
+
+		//console.log(DRAWGRAPHARRAY[j].year);
 
 		var activeSlider = getSliderFromYear(year);
 		var values = activeSlider.averagevalues;

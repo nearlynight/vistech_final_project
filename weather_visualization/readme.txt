@@ -10,6 +10,8 @@ canvas 	"graphCanvas"
 
 // VIEW.JS
 initControls(callBack)
+	onmousemove
+		isPointInside(pt)
 CountElementsOfYear(year)
 Slider(year)
 toRadians(angle)
