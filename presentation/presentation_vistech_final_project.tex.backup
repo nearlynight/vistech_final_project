@@ -214,7 +214,8 @@
     \begin{itemize}
       \item \textbf{marks}
 	\begin{itemize}
-	  \item lines (bars \& graphs)
+	  \item area (Detailansicht)
+	  \item lines (Graphen, Slider)
 	\end{itemize}
       \item \textbf{channels}
 	\begin{itemize}
@@ -237,13 +238,66 @@
   \end{frame}
   
   \begin{frame}
-  \frametitle{How - Manipulate}
-    \textbf{overview + detail}
+  \frametitle{HOW - Manipulate}
+    \textbf{detail + overview}
     \begin{figure}[h]
       \centering
       \includegraphics[width=.4\paperwidth,keepaspectratio=true]{./media/overview_detail.png}
       % Screenshot from 2015-12-15 19:29:36.png: 0x0 pixel, 300dpi, 0.00x0.00 cm, bb=
     \end{figure}
+  \end{frame}
+  
+  \begin{frame}
+  \frametitle{HOW - Facet}
+    \textbf{brushing \& linking}
+    \begin{itemize}
+     \item Farbe von
+     \begin{itemize}
+      \item Detailansicht
+      \item Slider Thumbnail
+      \item Linie Graph
+     \end{itemize}
+     \item Hervorhebung im Graph - Position Slider
+     \end{itemize}
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=.3\paperwidth,keepaspectratio=true]{./media/overview_detail.png}
+      % Screenshot from 2015-12-15 19:29:36.png: 0x0 pixel, 300dpi, 0.00x0.00 cm, bb=
+    \end{figure}
+  \end{frame}
+
+  \begin{frame}
+  \frametitle{HOW - Facet}
+    \textbf{superimpose}
+    \begin{itemize}
+     \item Überlagerung von:
+     \begin{itemize}
+      \item Daten in Detailansicht (kleinster Wert im Vordergrund - keine Verdeckung)
+      \item Graphen
+     \end{itemize}
+    \end{itemize}
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=.4\paperwidth,keepaspectratio=true]{./media/superimpose.png}
+      % Screenshot from 2015-12-15 19:29:36.png: 0x0 pixel, 300dpi, 0.00x0.00 cm, bb=
+    \end{figure}
+  \end{frame}
+
+  \begin{frame}
+  \frametitle{HOW - Reduce}
+    \textbf{detail on demand}
+    \\ focus \& context
+    \\ bei MouseOver werden mehr Informationen/genauer Wert mit Einheit angezeigt
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=.6\paperwidth,keepaspectratio=true]{./media/detail_on_demand.png}
+      % Screenshot from 2015-12-15 19:29:36.png: 0x0 pixel, 300dpi, 0.00x0.00 cm, bb=
+    \end{figure}
+  \end{frame}
+  
+  \begin{frame}
+  \centering
+  Vielen Dank für Ihre Aufmerksamkeit
   \end{frame}
 
 
